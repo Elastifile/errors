@@ -72,6 +72,8 @@ func New(e interface{}) *Error {
 	var err error
 
 	switch e := e.(type) {
+	case *Error:
+		return e
 	case error:
 		err = e
 	default:
@@ -83,6 +85,17 @@ func New(e interface{}) *Error {
 	return &Error{
 		Err:   err,
 		stack: stack[:length],
+	}
+}
+
+// Returns the inner error if the argument is an Error, otherwise
+// return it as-is.
+func Inner(e error) error {
+	switch e := e.(type) {
+	case *Error:
+		return e.Err
+	default:
+		return e
 	}
 }
 
@@ -166,6 +179,10 @@ func (err *Error) Error() string {
 	}
 
 	return msg
+}
+
+func (err *Error) GoString() string {
+	return err.Error()
 }
 
 // Stack returns the callstack formatted the same way that go does
